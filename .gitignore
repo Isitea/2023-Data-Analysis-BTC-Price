@@ -1,0 +1,4 @@
+pre-processing/*.csv
+pre-processing/*.xlsx
+logs.log
+catboost_info
