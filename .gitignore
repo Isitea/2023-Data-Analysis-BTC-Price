@@ -1,4 +1,5 @@
-pre-processing/*.csv
-pre-processing/*.xlsx
-logs.log
-catboost_info
+__pycache__/
+catboost_info/
+*.pkl
+*.log
+*.png
