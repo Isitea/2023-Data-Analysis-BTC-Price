@@ -77,7 +77,12 @@ def loadFile():
 
 
 def trainer(
-    data=loadFile(), count=1, hours=323, polynomial_features=False, polynomial_degree=3, use_gpu=False
+    data=loadFile(),
+    count=1,
+    hours=323,
+    polynomial_features=False,
+    polynomial_degree=3,
+    use_gpu=False,
 ):
     for runs in range(count):
         model_name = (
@@ -86,6 +91,23 @@ def trainer(
             + str(hours)
             + ")"
         )
+
+        if polynomial_features == True:
+            if polynomial_degree < 1:
+                polynomial_degree = 1
+            model_name = model_name + "[PD" + str(polynomial_degree) + "]"
+
+        print(
+            "Generating model(s) {current} / {total}".format(
+                current=runs + 1, totral=count
+            )
+        )
+        if use_gpu == True:
+            print("With GPU training")
+        if polynomial_features == True:
+            print(
+                "With polynomial assumption: {degree}".format(degree=polynomial_degree)
+            )
 
         stdoutOrigin = sys.stdout
         sys.stdout = open("./" + model_name + ".log", "w", encoding="utf8")
@@ -115,5 +137,5 @@ trainer(
     hours=args.hours,
     polynomial_features=args.features,
     polynomial_degree=args.degree,
-    use_gpu=args.GPU
+    use_gpu=args.GPU,
 )
