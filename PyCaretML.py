@@ -99,7 +99,7 @@ def trainer(
 
         print(
             "Generating model(s) {current} / {total}".format(
-                current=runs + 1, totral=count
+                current=runs + 1, total=count
             )
         )
         if use_gpu == True:
