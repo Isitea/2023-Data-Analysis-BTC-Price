@@ -1,6 +1,5 @@
 # Import pandas library
 import pandas as pd
-import numpy as np
 
 # Read the csv file
 # And convert text type 'Date' column into number type

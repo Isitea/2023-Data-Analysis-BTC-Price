@@ -5,7 +5,7 @@ import os
 import sys
 import argparse
 
-from PyCaretLib.AutoML import AutoML as ML
+from PyCaretLib.AutoML import generateModel
 
 parser = argparse.ArgumentParser(
     description="AutoML script using PyCaret for HTC Analysis contest 2023"
@@ -16,6 +16,7 @@ parser.add_argument(
     metavar="N",
     type=int,
     required=False,
+    default=1,
     help="Repeat count for generating regression model",
 )
 parser.add_argument(
@@ -24,6 +25,7 @@ parser.add_argument(
     metavar="N",
     type=int,
     required=False,
+    default=323,
     help="The number of recent data for training can vary, including the option of using the entire range when set to 0.",
 )
 parser.add_argument(
@@ -46,6 +48,7 @@ parser.add_argument(
     metavar="N",
     type=int,
     required=False,
+    default=3,
     help="Degree of polynomial features. For example, if an input sample is two dimensional and of the form [a, b], the polynomial features with degree = 2 are: [1, a, b, a^2, ab, b^2]. Ignored when polynomial_features is not True.",
 )
 args = parser.parse_args()
@@ -112,7 +115,7 @@ def trainer(
         stdoutOrigin = sys.stdout
         sys.stdout = open("./" + model_name + ".log", "w", encoding="utf8")
 
-        ML(
+        generateModel(
             cropedData=recentHours(dataframe=data, hours=hours),
             model_name="2023_BTC_Price_" + model_name,
             use_gpu=use_gpu,

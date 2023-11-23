@@ -2,7 +2,7 @@
 from pycaret.regression import *
 
 
-def AutoML(
+def generateModel(
     cropedData,
     model_name="default",
     use_gpu=False,
@@ -27,3 +27,13 @@ def AutoML(
     plot_model(final_model, plot="feature", save=True)
 
     return save_model(final_model, model_name=model_name)
+
+
+def applyModel(
+    question,
+    model_name="default",
+):
+    model = load_model(model_name)
+    prediction = predict_model(model, data=question)
+
+    return prediction
