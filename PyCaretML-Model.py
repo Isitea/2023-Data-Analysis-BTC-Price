@@ -30,21 +30,21 @@ parser.add_argument(
     type=int,
     required=False,
     default=323,
-    help="The number of recent data for training can vary, including the option of using the entire range when set to 0.",
+    help="Number of recent data hours for training; set to 0 for entire range.",
 )
 parser.add_argument(
     "--GPU",
     action=argparse.BooleanOptionalAction,
     required=False,
     default=False,
-    help="When set to True, use GPU acceleration for training",
+    help="Enable GPU acceleration for training",
 )
 parser.add_argument(
     "--features",
     action=argparse.BooleanOptionalAction,
     required=False,
     default=False,
-    help="When set to True, new features are derived using existing numeric features.",
+    help="Derive new features using existing numeric features",
 )
 parser.add_argument(
     "-D",
@@ -53,7 +53,7 @@ parser.add_argument(
     type=int,
     required=False,
     default=3,
-    help="Degree of polynomial features. For example, if an input sample is two dimensional and of the form [a, b], the polynomial features with degree = 2 are: [1, a, b, a^2, ab, b^2]. Ignored when polynomial_features is not True.",
+    help="Degree of polynomial features; ignored when polynomial_features is False",
 )
 
 # Parse the command-line arguments
@@ -61,35 +61,33 @@ args = parser.parse_args()
 
 
 # Function to filter recent hours of data from the dataframe
-def recentHours(dataframe, hours=323):
-    # Remove from row 1 to row 32500
-    # Last data: 32823 (2023.09.23 16:00)
-    # 323 hours = 13 days 11 hours => 2023.09.10 05:00 (32500)
+def filter_recent_hours(dataframe, hours=323):
+    # Remove data older than specified hours
     if hours > 0:
-        cropedData = dataframe.drop(range(0, 32823 - hours))
+        cropped_data = dataframe.drop(range(0, 32823 - hours))
     else:
-        cropedData = dataframe
+        cropped_data = dataframe
 
     # Reset index
-    cropedData.reset_index(drop=True, inplace=True)
+    cropped_data.reset_index(drop=True, inplace=True)
 
-    return cropedData
+    return cropped_data
 
 
 # Function to load the CSV file, remove unnecessary columns, and return the data
-def loadFile():
+def load_file():
     # Read the csv file
     df = pd.read_csv("./rawData/coin_price.csv")
 
-    # Remove 'id' column, 'data' column, 'tradecount' column and 'volume usdt' column
+    # Remove unnecessary columns
     data = df.drop(["id", "date", "tradecount", "volume usdt"], axis=1)
 
     return data
 
 
 # Function to train regression models using PyCaretLib.AutoML
-def trainer(
-    data=loadFile(),
+def train_models(
+    data=load_file(),
     count=1,
     hours=323,
     polynomial_features=False,
@@ -107,31 +105,29 @@ def trainer(
         )
 
         # Modify model name if polynomial features are used
-        if polynomial_features == True:
+        if polynomial_features:
             if polynomial_degree < 1:
                 polynomial_degree = 1
             model_name = model_name + "[PD" + str(polynomial_degree) + "]"
 
         # Print information about the current model generation
         print(
-            "Generating model(s) {current} / {total}".format(
-                current=runs + 1, total=count
-            )
+            "Generating model {current} / {total}".format(current=runs + 1, total=count)
         )
-        if use_gpu == True:
+        if use_gpu:
             print("With GPU training")
-        if polynomial_features == True:
+        if polynomial_features:
             print(
                 "With polynomial assumption: {degree}".format(degree=polynomial_degree)
             )
 
         # Redirect stdout to a log file for each model
-        stdoutOrigin = sys.stdout
+        stdout_origin = sys.stdout
         sys.stdout = open("./" + model_name + ".log", "w", encoding="utf8")
 
         # Call the 'generateModel' function to train the model
         generateModel(
-            cropedData=recentHours(dataframe=data, hours=hours),
+            cropped_data=filter_recent_hours(dataframe=data, hours=hours),
             model_name="2023_BTC_Price_" + model_name,
             use_gpu=use_gpu,
             polynomial_features=polynomial_features,
@@ -140,7 +136,7 @@ def trainer(
 
         # Close the log file and reset stdout
         sys.stdout.close()
-        sys.stdout = stdoutOrigin
+        sys.stdout = stdout_origin
 
         # Rename generated plots with the model-specific names
         os.rename(
@@ -153,8 +149,8 @@ def trainer(
     return True
 
 
-# Call the 'trainer' function with command-line arguments
-trainer(
+# Call the 'train_models' function with command-line arguments
+train_models(
     count=args.repeat,
     hours=args.hours,
     polynomial_features=args.features,

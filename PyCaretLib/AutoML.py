@@ -1,17 +1,17 @@
-# Import the pandas library and necessary functions from PyCaret for regression
+# Importing the pandas library and necessary functions from PyCaret for regression
 from pycaret.regression import *
 
 
-def generateModel(
-    cropedData,
+def generate_regression_model(
+    cropped_data,
     model_name="default",
     use_gpu=False,
     polynomial_features=True,
     polynomial_degree=3,
 ):
     # Set up the PyCaret regression experiment
-    exp = setup(
-        cropedData,
+    experiment = setup(
+        data=cropped_data,
         target="BTC_close",
         polynomial_features=polynomial_features,
         polynomial_degree=polynomial_degree,
@@ -37,15 +37,15 @@ def generateModel(
     return save_model(final_model, model_name=model_name)
 
 
-def applyModel(
-    question,
+def apply_regression_model(
+    input_data,
     model_name="default",
 ):
     # Load the pre-trained model
     model = load_model(model_name)
 
     # Make predictions using the loaded model
-    prediction = predict_model(model, data=question)
+    predictions = predict_model(model, data=input_data)
 
     # Return the predictions
-    return prediction
+    return predictions

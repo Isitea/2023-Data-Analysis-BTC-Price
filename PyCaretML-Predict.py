@@ -3,43 +3,43 @@ import pandas as pd
 import argparse
 
 # Importing the custom AutoML module
-from PyCaretLib.AutoML import applyModel
+from PyCaretLib.AutoML import apply_regression_model as apply_model
 
 # Setting up command-line argument parser
-parser = argparse.ArgumentParser(
+arg_parser = argparse.ArgumentParser(
     description="AutoML script using PyCaret for HTC Analysis contest 2023"
 )
 
 # Adding command-line arguments for the model, input data file, and optional output file
-parser.add_argument(
-    "model",
+arg_parser.add_argument(
+    "model_path",
     type=str,
-    help="Trained model for prediction",
+    help="Path to the trained model for prediction",
 )
-parser.add_argument(
-    "question",
+arg_parser.add_argument(
+    "input_data",
     type=str,
-    help="The CSV file which holds data for prediction",
+    help="Path to the CSV file containing data for prediction",
 )
-parser.add_argument(
-    "answer",
+arg_parser.add_argument(
+    "output_file",
     type=str,
     nargs="?",
-    help="The CSV file which holds predicted data",
+    help="Path to the CSV file to store predicted data",
 )
-args = parser.parse_args()
+args = arg_parser.parse_args()
 
 
 # Main function to execute AutoML and generate predictions
-def main():
+def run_automl():
     # Reading input data from the specified CSV file
-    question = pd.read_csv(args.question)
+    input_data = pd.read_csv(args.input_data)
 
     # Applying the trained model to make predictions
-    answer = applyModel(question, args.model)
+    predictions = apply_model(input_data, args.model_path)
 
     # Renaming columns for clarity, assuming the prediction label is "BTC_close"
-    result = answer.rename(columns={"prediction_label": "BTC_close"})
+    result = predictions.rename(columns={"prediction_label": "BTC_close"})
 
     # Reordering columns for better organization
     result = result.reindex(
@@ -49,11 +49,9 @@ def main():
     )
 
     # Saving the result to a CSV file, either the default "answer.csv" or the specified output file
-    if args.answer is None:
-        result.to_csv("answer.csv", index=None, header=True)
-    else:
-        result.to_csv(args.answer, index=None, header=True)
+    output_file = args.output_file if args.output_file else "regression.csv"
+    result.to_csv(output_file, index=None, header=True)
 
 
 # Calling the main function to start the AutoML process
-main()
+run_automl()
